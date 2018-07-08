@@ -1,0 +1,148 @@
+#! /usr/bin/perl -w
+
+use strict;
+use POSIX;
+use List::Util qw ( min max );
+
+####################################
+##### Name = Pruthvi Sambu
+#####  Assignment 3
+#####   Submission date : 08/06/2017
+#####################################
+
+&driver();    # Driver subroutine.
+#######################################################################
+sub getStart 
+{
+        my ($n,$M, $trial) = @_;           # call by value.
+        my $initCell = int(rand($n*$n));  # Generate an random value for a given board.
+	my ($row,$col) = (int($initCell/$n),$initCell % $n);      # Get the row and column values.       
+	my %hash;                     
+        my $init = 0;
+	    while($init < $n*$n)
+	    { 
+                $hash{$init}=0;
+ 		$init++;		# Initialize a hash with all 0 or false values.               
+            }
+        $hash{$initCell} = 1;             # Change the hash value to true if the knight visits the cell.        
+		if( $trial % $M == 0)              
+		{
+                printf "\tStarting point: (%d,%d)\n", $row+1, $col+1;
+        }
+
+        return &mvKnight($n,$M,$trial,$row,$col,%hash);     # Return the total squares touched.
+}
+##########################################################################   
+sub mvKnight 
+{
+        my @horz = (2,1,-1,-2,-2,-1,1,2);             # Set all the moves could a Knight move.
+        my @vert = (-1,-2,-2,-1,1,2,2,1);   
+        my($n, $M, $trial, $row, $col, %hash) = @_;   # Get all the data from called Subroutine.
+        my $squareTouch = 1;                    
+        my ($newCell,$m);
+        my $hasNext = 0;
+        my @list = ();
+       ($hasNext, @list) = &nextMove($row, $col, $n, %hash);    # call nextMove to get a list of valid moves.
+        while($hasNext)                          # Infinite loop till the Knight can move. 
+		{
+		        $m = int(rand (@list));          # getting a random value from the list
+
+                $row += $vert[$list[$m]];      	 # Calculating row and column numbers
+                $col += $horz[$list[$m]];
+                $newCell = ($row * $n)+$col;
+                $hash{$newCell}= 1;              # indicating the visited cell.
+		        $squareTouch += 1;
+		        ($hasNext,@list) = &nextMove($row, $col, $n, %hash); # call nextMove to get a list of valid moves.
+        }
+        if($trial % $M ==0)                      # Print the total squares touched for every M experiment.
+		{
+                print "\tTotal number of squares touched: $squareTouch \n";
+        }
+
+        $squareTouch;
+}	
+########################################################################         
+sub nextMove {
+        my($row, $col, $n, %hash) = @_;     # Get all the data from called Subroutine.   
+        my @horz = (2,1,-1,-2,-2,-1,1,2);   # Set all the moves could a Knight move.
+        my @vert = (-1,-2,-2,-1,1,2,2,1);   
+        my $hasNext = 0;                    
+        my $newCell; 
+        my ($newRow, $newCol)= (0,0);
+        my @valid=();
+        foreach (0..7)                      # Set to loop to max of 8. 
+		{
+                $newRow = $row + $vert[$_];  # getting a new row value
+                $newCol = $col + $horz[$_];  # getting the column value for the row above
+                $newCell = ($newRow * $n)+$newCol;  # calculating the cell value with row and column values
+                if( ($newRow >= 0) && ($newRow < $n))
+		{
+			if(($newCol >= 0) && ($newCol < $n) && (!$hash{$newCell}) )  # Check whether Knight could move to that new position.
+				{ 
+                        		push @valid, $_;
+				}
+                }
+        }
+        if(@valid) 
+		{
+		return ($hasNext+1, @valid);
+        }
+	else{
+        return ($hasNext,@valid);
+	}
+}
+#####################################################
+sub print_results 
+{
+        my (@result) = @_;
+	my (@values) = ("N", "Min Value", "Max Value", "Average");
+	foreach (0..3)
+	{
+		print "The $values[$_] of board is $result[$_] \n";
+	}
+}
+#######################################################
+sub driver 
+{
+        my($n, $N, $F) = (1, 1, 10);     # n for chess board dimension.
+	                                     # N for no. of individual experiments
+	                                     # F To print data after F trails
+        my $trial = 1;
+        my @total;
+	my $sum = 0;
+        my $M = 1;
+	    if(@ARGV == 1)                   # Read command parameters.
+		{
+                   $n = $ARGV[0];        
+        	} 
+	    elsif(@ARGV == 2) 
+	 	{
+                  ($n,$N) = @ARGV;
+        	} 
+	    elsif (@ARGV == 3) 
+		{
+                  ($n,$N,$F) = @ARGV;
+        	}
+
+        srand (1);
+	    $M = ($N < $F) ? ($N) : ceil($N / $F );  # Based on F and N set the M value.
+        my ($min,$max,$totalSquares) = (0,0,0);;
+        print "size = $n\n";                          
+        for($trial = 1; $trial <= $N; $trial++)      # Iterate the experiments based on N. 
+		{
+			(($trial% $M) == 0) ? print "Trail number = $trial \n": print "";
+                	push @total,&getStart($n, $M, $trial);
+        	}
+
+
+	foreach (@total)
+	{
+		$sum += $_; 
+	}	
+	$min = min(@total);
+	$max = max(@total);
+	my $average = $sum/$N;
+                                             
+       &print_results($N, $min, $max, $average);  #Calling the print_results sub to print all values.
+}
+

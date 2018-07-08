@@ -1,0 +1,154 @@
+#! /usr/bin/perl -w
+
+
+#######################################
+#### Name = Pruthvi Sambu
+####  Assignment 2
+####   Submission date : 07/19/2017
+########################################
+##initialization
+
+use strict;
+
+######Function calling to read write aand check the file
+&checkArgs;
+&openFiles;
+&printHash((&createHash(&createList)));
+#my @list = &createList;
+#my %hash = &createHash (@list);
+#(&createHash(&createList));
+#&printHash(@sortHash);
+
+
+my ($inputfile, $outputfile) = @ARGV;
+
+#####Sub routine to check the input arguments
+sub checkArgs
+{
+	## Condition for a valid number of argumrnts
+	if($#ARGV+1 == 2)
+	{
+	   return @ARGV;
+	}
+	##Error msg and to abort a progrsm if the number of arguments are wrong
+	else
+   	{
+	   print STDERR "Enter correct number of arguments!\n";
+	   die "Wrong number of files names found!\n";
+   	}
+}
+
+####Sub routine to open the files both input and output
+sub openFiles
+{
+	##Condition to check if the file doesnot open and
+	#print and error msg and abort the program if not found
+	my($read) = open INPUT ,"<",$ARGV[0];
+	if(!$read)
+	{
+	   die "Cannot open a file $ARGV[0] : $!!";
+	}
+	##Condition to check if the file doesnot open and
+	##print and error msg and abort the program if not found
+	my($write) = open OUTPUT ,">",$ARGV[1];
+	if(!$write)
+	{
+	   die "Cannot open a file $ARGV[1] : $!!";
+	}
+}
+
+####subroutine to close the opened files
+sub closeFiles
+{
+	##Aborth and print a error msg if the files could not be closed
+	if(!close INPUT)
+	{
+		print STDERR "Could not close file $ARGV[0] \n";
+		die "could not close file:$ARGV[0]:$!";
+	}
+	if(!close OUTPUT)
+	{
+		print STDERR "Could not close file $ARGV[1] \n";
+		die "could not close file:$ARGV[1]:$!";
+	}
+}
+
+####Sub zzroutine to create a list fromm the input file
+sub createList
+{
+	my @list = ();
+	my @newlist = ();
+	my $line = 0;
+	##Line by line check
+	while ($line = <INPUT>)
+	{
+		chomp $line;
+		#print "$line\n";
+		#Spliting the input values using space and - as seperators
+		@list = split /[\s+-]/ ,$line;
+		foreach (@list)
+		{
+			push @newlist,$_;
+		}
+	}
+	## Calling the craete hash function
+	#&createHash (@newlist);
+	return @newlist;
+}
+
+####Sub routine to create hash from the list
+sub createHash
+{
+	##initializing the values
+	my %hash;
+	my $hash = 0;
+	my (@list) = @_;
+	my $item = 0;
+	##loop to split the input values 
+	foreach (@list)
+	{
+		#s/(^[\W^\d^])|([\W^\d^].*)//g;
+		s/^(\d+|\W+)//g;
+		s/(\W+)$//g;
+		#s/(\b\w+?\b)/$`/g;
+		s/(\'.*)//g;
+		s/(.)/\L$1/g;
+		#print "$_\n";
+		if($_ ne '')
+		{
+			##incrementing the hash valuess for the repested keys
+			$hash{$_}+=1;
+		}
+	}
+	#returns the hash value
+	return %hash;
+}
+
+####print the hash function
+sub printHash
+{
+	####initializing the input values
+	my %hash = @_;
+	my @list = sort keys %hash; 
+	my $i= 1;
+	my $item = 0;
+
+	###printing the values on to the output file
+	select OUTPUT;
+	print "size = ($#list + 1)\n";
+	##loop to print the values to the output folder
+	foreach $item(@list)
+	{
+		printf"%-15s:%2d ", $item, $hash{$item};
+		#print $item;
+		#print $hash{$item};
+		if($i%3 == 0)
+		{
+			print "\n";
+		}
+	$i++;
+	}
+	print "\n";
+	&closeFiles;	
+}
+

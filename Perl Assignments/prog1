@@ -1,0 +1,100 @@
+#! /usr/bin/perl -w
+use strict;
+
+#######################################
+### Name = Pruthvi Sambu
+###  Assignment 1
+###   Submission date : 07/05/2017
+#######################################
+#Reading values from a FILE
+my(@list) = <>;
+#using CHOMP function
+chomp(@list);
+
+my($temp,@rest) = @list;
+
+
+###### Condition to check if the file is empty ########
+
+if($#list == -1){
+print "LIST IS EMPTY \n";
+}
+
+else{
+##### Assigning the values for functions #############
+my($lowest) = &low;
+my($highest) = &high;
+my($sum) = &total;
+my($mean) = &average;
+my($deviation) = &std_deviation;
+&print_stat($lowest, $highest, $sum, $mean, $deviation);
+
+#print "The lowest number is $lowest \n";
+#print "The highest number is $highest \n";
+#print "The sum is $sum \n";
+#print "The average is $mean \n";
+#print "The standard deviation is $deviation \n";
+
+##### Function declaration or definition ############
+
+#### Subroutine for lowest value
+sub low{
+foreach(@rest){     #### Condition to find the lowest value
+if($_ < $temp)
+	{
+	  $temp = $_;
+	}
+}
+$temp;
+}
+
+##### Subroutine for highest value
+sub high{
+foreach(@rest){     #### Looping the values to get the highest value
+	if($_ > $temp)
+        {
+          $temp = $_;
+        }
+}
+$temp;
+}
+
+#### Subroutine to get the total for the entered values
+sub total{
+my($temp1) = 0;
+	foreach(@list){	    #### Looping to get the sum
+          $temp1 += $_;
+	}
+	$temp1;
+}
+
+#### Subroutine to get the average of the entered values
+sub average{
+my($mean)=0;
+	if($#list+1 >= 0)   
+	{
+	  ($mean)=&total/($#list+1);    ##### condition for the mean
+	}
+	$mean;
+}
+
+#### Subroutine to get the standard deviation for the entered values
+sub std_deviation{
+my($var) = 0;
+if($#list !=0){
+	foreach(@list)
+	  {
+	     $var += (($_-$mean)*($_-$mean))/$#list; 
+	  }
+	}
+	$var;
+}
+
+
+##### Print subroutine
+sub print_stat{
+	my(@result) = @_;
+	  print "The lowest, highest, sum, average, standard deviation values of given list are \n";
+	  print "@result \n";
+	}
+}
